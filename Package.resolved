@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "paginable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iWECon/Paginable",
+      "state" : {
+        "branch" : "main",
+        "revision" : "6c27c33b6c4455611c5a28075fc08893eb4198ac"
+      }
+    }
+  ],
+  "version" : 2
+}

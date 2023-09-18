@@ -7,8 +7,28 @@
 
 import UIKit
 
-public protocol TableCellDataSetuper {
+/**
+ 
+ final class Cell: UITableViewCell, TableCellDataSetuper {
+
+     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+         super.init(style: style, reuseIdentifier: reuseIdentifier)
+     }
+
+     required init?(coder: NSCoder) {
+         fatalError("init(coder:) has not been implemented")
+     }
+
+     // Implementing the method
+     func setupData(_ data: Any) {
+  
+     }
+ 
+ }
+ */
+
+public protocol TableCellDataSetuper: AnyObject {
     
-    func setupCellData(_ data: Any)
+    func setupData(_ data: Any)
     
 }

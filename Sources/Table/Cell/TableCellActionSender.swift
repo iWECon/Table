@@ -7,22 +7,7 @@
 
 import UIKit
 
-public protocol TableCellActionSender {
+public protocol TableCellActionSender: AnyObject {
+    /// Please declare it as weak
     var actionSender: TableCellActionRespond? { get set }
-}
-
-private struct TableCellActionSenderAssociatedKeys {
-    static var actionSender = "actionSender"
-}
-
-extension TableCellActionSender where Self: UITableViewCell {
-    
-    public var actionSender: TableCellActionRespond? {
-        get {
-            objc_getAssociatedObject(self, &TableCellActionSenderAssociatedKeys.actionSender) as? TableCellActionRespond
-        }
-        set {
-            objc_setAssociatedObject(self, &TableCellActionSenderAssociatedKeys.actionSender, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
 }

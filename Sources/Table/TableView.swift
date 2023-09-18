@@ -1,34 +1,204 @@
 import UIKit
 import Combine
+import Dispatch
+import ScrollViewRefreshable
+
+/**
+ TableView(style: .plain)
+     .bind(viewModel: `TableData`)
+     .setTableDelegate(_: `TableDelegate`)
+     .setTableDataSource(_: `TableDataSource`)
+ */
 
 open class TableView: UITableView {
     
-    public var cancellables = Set<AnyCancellable>()
+    deinit {
+        reloadCancellable = nil
+        offsetYCancellable = nil
+    }
+    
+    /// Indicator of Pull to refresh
+    ///
+    /// Change color: Use `tableRefreshControl.tintColor = UIColor`
+    public let tableRefreshControl = UIRefreshControl()
     
     /// Subscriber for reloading table view data
-    public var reloadCancellable: AnyCancellable?
+    internal var reloadCancellable: AnyCancellable?
+    /// Indicate whether the publisher offset.y event is cancelled
+    internal var offsetYCancellable: AnyCancellable?
     
-    public let viewModel: TableData
-    public init(viewModel: TableData) {
-        self.viewModel = viewModel
-        super.init(frame: .zero, style: viewModel.style)
-        self.setup()
+    /// Indicator of LoadMore
+    public let loadMoreIndicator = LoadMoreIndicator()
+    
+    /// Indicator of Empty Data
+    public var emptyView: UIView?
+    
+    public var viewModel: TableDataProvider!
+    public required init(style: UITableView.Style) {
+        super.init(frame: .zero, style: style)
     }
     
     public required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     /// Set up table view `dataSource`, `delegate` and bind `reloadDataSubject`
-    open func setup() {
-        self.dataSource = viewModel.dataSource
-        self.delegate = viewModel.delegate
-        
-        reloadCancellable = viewModel.reloadDataSubject
-            .receive(on: ImmediateScheduler.shared)
-            .sink { [weak self] _ in
+    func setup() {
+        reloadCancellable?.cancel()
+        reloadCancellable = viewModel.applyDataSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] value in
+                self?.loadMoreIndicator.stopLoadMore()
+                self?.emptyView?.removeFromSuperview()
+                self?.viewModel.applyTemporaryData()
                 self?.reloadData()
             }
+        
+        viewModel.emptyDataSubject
+            .receive(on: RunLoop.main)
+            .compactMap({ [weak self] _ in
+                self?.emptyView
+            })
+            .sink { [weak self] emptyV in
+                guard let self else { return }
+                self.addSubview(emptyV)
+                emptyV.frame = self.bounds
+            }
+            .store(in: &viewModel.cancellables)
+        
+        viewModel.noMoreDataSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.loadMoreIndicator.noMoreData(on: self)
+            }
+            .store(in: &viewModel.cancellables)
+        
+        if viewModel.isEnableRefresh {
+            setupRefreshEvent()
+        }
+        if viewModel.loadMoreDistance != .none {
+            setupLoadMoreEvent()
+        }
+        
+        // 创建时自动初始化数据
+        viewModel.resetDataSubject.send()
     }
     
+    private func setupRefreshEvent() {
+        viewModel.refreshCancellable?.cancel()
+        tableRefreshControl.removeTarget(self, action: #selector(refreshAction(_:)), for: .valueChanged)
+        
+        viewModel.refreshCancellable = viewModel.resetDataSubject
+            .receive(on: DispatchQueue.global())
+            .filter({ [weak self] in
+                self?.viewModel.isRefreshing == false
+                && self?.viewModel.isLoadingMore == false
+                && self?.viewModel.isEnableRefresh == true
+            })
+            .sink { [weak self] _ in
+                guard let self else { return }
+                
+                self.viewModel.isRefreshing = true
+                self.viewModel.paging.reset()
+                
+                self.viewModel.fetch(page: self.viewModel.paging)
+                    .endRefresh(self, action: .refresh)
+                    .assign(to: self.viewModel, action: .reset)
+                    .store(in: &self.viewModel.cancellables)
+            }
+        
+        refreshControl = tableRefreshControl
+        tableRefreshControl.addTarget(self, action: #selector(refreshAction(_:)), for: .valueChanged)
+    }
+    
+    private func setupLoadMoreEvent() {
+        viewModel.loadMoreCancellable?.cancel()
+        offsetYCancellable?.cancel()
+        
+        viewModel.loadMoreCancellable = viewModel.nextPageDataSubject
+            .receive(on: DispatchQueue.global())
+            .filter({ [weak self] in
+                self?.viewModel.isRefreshing == false
+                && self?.viewModel.isLoadingMore == false
+                && self?.viewModel.loadMoreDistance != .some(.none)
+                && self?.viewModel.paging.noMoreData == false
+            })
+            .sink { [weak self] _ in
+                guard let self else { return }
+                
+                self.viewModel.isLoadingMore = true
+                
+                DispatchQueue.main.async {
+                    self.loadMoreIndicator.startLoadMore(on: self)
+                }
+                
+                self.viewModel.fetch(page: self.viewModel.paging)
+                    .endRefresh(self, action: .loadMore)
+                    .assign(to: self.viewModel, action: .append)
+                    .store(in: &self.viewModel.cancellables)
+            }
+        
+        offsetYCancellable = publisher(for: \.contentOffset)
+            .map(\.y)
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] offsetY in
+                self?.offsetYChangedAction(offsetY)
+            })
+    }
+    
+    private func refreshNoMoreDataIndicator(isNoMoreData: Bool) {
+        guard isNoMoreData else { return }
+        
+        DispatchQueue.main.async {
+            self.loadMoreIndicator.noMoreData(on: self)
+        }
+    }
+    
+    /// Handling the triggering of the `LoadMore` event
+    private func offsetYChangedAction(_ offsetY: CGFloat) {
+        if case .none = viewModel.data {
+            return
+        }
+        if case .empty = viewModel.data {
+            return
+        }
+        
+        let lessValue = viewModel.loadMoreDistance.value(contentHeight: contentSize.height)
+        guard abs(offsetY + frame.size.height - contentSize.height) <= lessValue else {
+            return
+        }
+        self.viewModel.nextPageDataSubject.send()
+    }
+    
+    /// Handling the triggering of the `Refresh` event
+    @objc private func refreshAction(_ sender: UIRefreshControl) {
+        self.viewModel.resetDataSubject.send()
+    }
+    
+}
+
+// MARK: Chainable
+extension TableView {
+    
+    @discardableResult
+    public func bind(
+        viewModel: TableDataProvider
+    ) -> TableView {
+        self.viewModel = viewModel
+        self.setup()
+        return self
+    }
+    
+    @discardableResult
+    public func setTableDelegate(_ delegate: TableDelegate?) -> TableView {
+        self.delegate = delegate
+        return self
+    }
+    
+    @discardableResult
+    public func setTableDataSource(_ dataSource: TableDataSource?) -> TableView {
+        self.dataSource = dataSource
+        return self
+    }
 }

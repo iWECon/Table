@@ -1,7 +1,6 @@
 import UIKit
 import Combine
 import Dispatch
-import ScrollViewRefreshable
 
 /**
  TableView(style: .plain)

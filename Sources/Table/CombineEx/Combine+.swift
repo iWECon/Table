@@ -8,7 +8,6 @@
 import Foundation
 import Dispatch
 import Combine
-import ScrollViewRefreshable
 
 public enum AssignTableAction {
     case reset

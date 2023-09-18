@@ -8,7 +8,6 @@
 import UIKit
 import Combine
 import Paginable
-import ScrollViewRefreshable
 
 public enum TableData {
     /// Default value (Use in XXControllerViewModel create)

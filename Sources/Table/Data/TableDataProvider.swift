@@ -11,6 +11,7 @@ import Paginable
 
 public enum TableData {
     /// Default value (Use in XXControllerViewModel create)
+    /// 默认值，创建时没有数据用这个
     case none
     
     /// Use this when refresh the data is empty
@@ -20,7 +21,7 @@ public enum TableData {
     case list(_ value: [TableCellViewModel])
     case section(_ value: [TableSectionCellViewModel])
     
-    var listValue: [TableCellViewModel] {
+    public var listValue: [TableCellViewModel] {
         switch self {
         case .list(let value):
             return value
@@ -29,7 +30,7 @@ public enum TableData {
         }
     }
     
-    var sectionValue: [TableSectionCellViewModel] {
+    public var sectionValue: [TableSectionCellViewModel] {
         switch self {
         case .section(let value):
             return value
@@ -39,7 +40,19 @@ public enum TableData {
     }
     
     /// Available the TableData is in `[.list, .section]`
-    var isEmpty: Bool {
+    public var count: Int {
+        switch self {
+        case .list(let v):
+            return v.count
+        case .section(let v):
+            return v.count
+        default:
+            return 0
+        }
+    }
+    
+    /// Available the TableData is in `[.list, .section]`
+    public var isEmpty: Bool {
         switch self {
         case .list(let v):
             return v.isEmpty

@@ -11,6 +11,44 @@ public protocol TableCellActionRespond: AnyObject {
     func tableCellActionRespond(_ action: TableCellAction)
 }
 
+/**
+ final class XXController: UIViewController {
+    
+    // **MUST** stronger
+    // `生命周期需要被持有，否则创建后立即销毁`
+    let cellActionResponder = DefaultTableCellActionRespond()
+ 
+    override func viewDidLoad() {
+        cellActionResponder.respond(to: viewModel) { [weak self] action in
+            self?.xxx
+        }
+    }
+ }
+ */
+public class DefaultTableCellActionRespond: TableCellActionRespond {
+    deinit {
+        respond = nil
+        print("\(Self.self) deinit")
+    }
+    
+    private var respond: ((TableCellAction) -> Void)?
+    public init(respond: ((TableCellAction) -> Void)?) {
+        self.respond = respond
+    }
+    
+    public init() { }
+    
+    /// Bind `viewModel.cellActionResponder = self`
+    /// and set respond action
+    public func respond(to viewModel: TableDataProvider, _ respond: ((TableCellAction) -> Void)?) {
+        viewModel.cellActionResponder = self
+        self.respond = respond
+    }
+    public func tableCellActionRespond(_ action: TableCellAction) {
+        self.respond?(action)
+    }
+}
+
 public protocol TableCellDidSelectedRespond: AnyObject {
     
     /// Default is `(true, true)`

@@ -39,32 +39,36 @@ public final class StaticTableData: TableViewModel {
 }
 
 open class StaticTableCellViewModel: TableCellViewModel {
-    
+    open var identifier: String
     open var cellType: TableCellType
     open var cellHeight: CGFloat
     
     open var model: Any
     
-    public init(model: Any, cellType: TableCellType, cellHeight: CGFloat) {
+    public init(model: Any, identifier: String = UUID().uuidString, cellType: TableCellType, cellHeight: CGFloat) {
         self.model = model
+        self.identifier = identifier
         self.cellType = cellType
         self.cellHeight = cellHeight
     }
     
-    public init(model: Any, cellType: (_ model: Any) -> TableCellType, cellHeight: (_ model: Any) -> CGFloat) {
+    public init(model: Any, identifier: String = UUID().uuidString, cellType: (_ model: Any) -> TableCellType, cellHeight: (_ model: Any) -> CGFloat) {
         self.model = model
+        self.identifier = identifier
         self.cellHeight = cellHeight(model)
         self.cellType = cellType(model)
     }
     
-    public init(model: Any, cellType: (_ model: Any) -> TableCellType, cellHeight: CGFloat) {
+    public init(model: Any, identifier: String = UUID().uuidString, cellType: (_ model: Any) -> TableCellType, cellHeight: CGFloat) {
         self.model = model
+        self.identifier = identifier
         self.cellHeight = cellHeight
         self.cellType = cellType(model)
     }
     
-    public init(model: Any, cellType: TableCellType, cellHeight: (_ model: Any) -> CGFloat) {
+    public init(model: Any, identifier: String = UUID().uuidString, cellType: TableCellType, cellHeight: (_ model: Any) -> CGFloat) {
         self.model = model
+        self.identifier = identifier
         self.cellHeight = cellHeight(model)
         self.cellType = cellType
     }

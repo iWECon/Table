@@ -11,8 +11,13 @@ public final class LoadMoreIndicator: UIView {
     
     public struct Appearance {
         public var noMoreDataTips: [String] = ["已经到底啦😊~", "我也是有底线的啦😠!!!", "没有更多了😭"]
+        
+        /// Whether to display when there is no more data
+        public var showWhenNoMoreData = true
     }
     public static var `default`: Appearance = Appearance()
+    
+    public var showWhenNoMoreData = LoadMoreIndicator.default.showWhenNoMoreData
     
     public let indicatorView = UIActivityIndicatorView(style: .medium)
     public let tipsLabel = UILabel()
@@ -66,6 +71,10 @@ public final class LoadMoreIndicator: UIView {
     }
     
     public func noMoreData(on scrollView: UIScrollView) {
+        guard showWhenNoMoreData else {
+            stopLoadMore()
+            return
+        }
         guard self.reset(on: scrollView) else { return }
         
         self.tipsLabel.isHidden = false

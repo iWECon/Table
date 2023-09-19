@@ -156,6 +156,9 @@ open class TableView: UITableView {
     
     /// Handling the triggering of the `LoadMore` event
     private func offsetYChangedAction(_ offsetY: CGFloat) {
+        guard !viewModel.isLoadingMore, !viewModel.isRefreshing else { return }
+        guard offsetY > 0 else { return }
+        
         if case .none = viewModel.data {
             return
         }

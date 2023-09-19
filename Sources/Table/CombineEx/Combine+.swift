@@ -55,7 +55,6 @@ extension Publisher where Self.Output == TableData {
             if output.isEmpty {
                 tableDataProvider.temporaryData = .empty
                 tableDataProvider.applyDataSubject.send()
-                tableDataProvider.emptyDataSubject.send()
             } else {
                 switch action {
                 case .reset:

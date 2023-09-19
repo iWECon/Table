@@ -46,11 +46,16 @@ open class TableView: UITableView {
         reloadCancellable?.cancel()
         reloadCancellable = viewModel.applyDataSubject
             .receive(on: RunLoop.main)
-            .sink { [weak self] value in
+            .sink { [weak self] _ in
                 self?.loadMoreIndicator.stopLoadMore()
-                self?.emptyView?.removeFromSuperview()
                 self?.viewModel.applyTemporaryData()
                 self?.reloadData()
+                
+                if self?.viewModel.data.isEmpty == true {
+                    self?.viewModel.emptyDataSubject.send()
+                } else {
+                    self?.emptyView?.removeFromSuperview()
+                }
             }
         
         viewModel.emptyDataSubject

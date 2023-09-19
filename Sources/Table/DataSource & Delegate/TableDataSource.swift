@@ -49,6 +49,7 @@ open class TableDataSource: NSObject, UITableViewDataSource, UITableViewDataSour
         
         // bind action responder
         if let action = cell as? TableCellActionSender {
+            action.indexPath = indexPath
             action.actionSender = viewModel.cellActionResponder
         }
         return cell

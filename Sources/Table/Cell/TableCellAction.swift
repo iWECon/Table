@@ -35,14 +35,14 @@ import UIKit
 
 public protocol TableCellAction {
     var id: String { get }
-    var cell: UITableViewCell { get }
+    var cell: UITableViewCell & TableCellActionSender { get }
 }
 
 public struct DefaultTableCellAction: TableCellAction {
     public var id: String
-    public var cell: UITableViewCell
+    public var cell: UITableViewCell & TableCellActionSender
     
-    public init(id: String, cell: UITableViewCell) {
+    public init(id: String, cell: UITableViewCell & TableCellActionSender) {
         self.id = id
         self.cell = cell
     }

@@ -209,6 +209,39 @@ extension TableDataProvider {
         }
     }
     
+    /// Remove Section
+    public func removeSection(where: (TableSectionCellViewModel) -> Bool) {
+        var data = self.data.sectionValue
+        data.removeAll(where: `where`)
+        
+        self.temporaryData = .section(data)
+        self.applyDataSubject.send()
+    }
+    
+    /// Remove Item from `List`
+    public func remove(cellViewModel: TableCellViewModel) {
+        switch data {
+        case .list(let value):
+            var v = value
+            v.removeAll(where: { $0.identifier == cellViewModel.identifier })
+            
+            self.temporaryData = .list(v)
+            self.applyDataSubject.send()
+            
+        case .section(let value):
+            // Wait test
+            let v = value
+            v.forEach { sectionCellViewModel in
+                sectionCellViewModel.data.removeAll(where: { $0.identifier == cellViewModel.identifier })
+            }
+            self.temporaryData = .section(v)
+            self.applyDataSubject.send()
+            
+        default:
+            break
+        }
+    }
+    
     public func cellViewModel(for indexPath: IndexPath) -> TableCellViewModel {
         switch data {
         case .list(let value):

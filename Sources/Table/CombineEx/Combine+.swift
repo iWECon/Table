@@ -9,11 +9,6 @@ import Foundation
 import Dispatch
 import Combine
 
-public enum AssignTableAction {
-    case reset
-    case append
-}
-
 /**
  The extension of protocol `Publisher` cannot have an inheritance clause
  */
@@ -40,7 +35,7 @@ extension Publisher {
 
 extension Publisher where Self.Output == TableData {
     
-    public func assign(to tableDataProvider: TableDataProvider, action: AssignTableAction) -> AnyCancellable {
+    public func assign(to tableDataProvider: TableDataProvider, action: TableDataAction) -> AnyCancellable {
         sink { [weak tableDataProvider] completion in
             switch completion {
             case .finished:

@@ -9,6 +9,11 @@ import UIKit
 import Combine
 import Paginable
 
+public enum TableDataAction {
+    case reset
+    case append
+}
+
 public enum TableData {
     /// Default value (Use in XXControllerViewModel create)
     /// 默认值，创建时没有数据用这个
@@ -207,6 +212,16 @@ extension TableDataProvider {
         case .none, .empty:
             return 0
         }
+    }
+    
+    /// Append data
+    ///
+    /// viewModel.append(.list([]))
+    /// or
+    /// viewModel.append(.section([]))
+    public func appendTableData(_ tableData: TableData) {
+        self.temporaryData = self.data + tableData
+        applyDataSubject.send()
     }
     
     /// Remove Section

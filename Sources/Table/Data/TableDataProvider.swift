@@ -164,9 +164,6 @@ public protocol TableDataProvider: AnyObject, Paginable.Pagingable, ScrollViewRe
     /// Fetch data from server but it is empty
     var emptyDataSubject: PassthroughSubject<(), Never> { get }
     
-    /// Fetch data from server but it is no more data
-    var noMoreDataSubject: PassthroughSubject<(), Never> { get }
-    
     /// Fetch data from server with Paging
     ///
     /// You can call refresh action with `resetDataSubject.send()`

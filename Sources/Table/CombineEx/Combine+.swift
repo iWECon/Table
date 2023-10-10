@@ -58,10 +58,6 @@ extension Publisher where Self.Output == TableData {
                     tableDataProvider.temporaryData = tableDataProvider.data + output
                 }
                 tableDataProvider.applyDataSubject.send()
-                
-                if tableDataProvider.paging.noMoreData {
-                    tableDataProvider.noMoreDataSubject.send()
-                }
             }
         }
     }
@@ -82,7 +78,6 @@ extension Publisher {
                 case .loadMore:
                     tableView?.viewModel.isLoadingMore = false
                     tableView?.loadMoreIndicator.stopLoadMore()
-                    tableView?.viewModel.paging.noMoreData = true
                 }
                 tableView?.tableRefreshControl.endRefreshing()
             }
@@ -94,7 +89,6 @@ extension Publisher {
                 case .loadMore:
                     tableView?.viewModel.isLoadingMore = false
                     tableView?.loadMoreIndicator.stopLoadMore()
-                    tableView?.viewModel.paging.noMoreData = true
                 }
                 tableView?.tableRefreshControl.endRefreshing()
             }

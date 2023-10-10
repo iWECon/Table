@@ -59,7 +59,6 @@ open class TableViewModel: TableDataProvider {
     public var nextPageDataSubject: PassthroughSubject<(), Never> = PassthroughSubject<(), Never>()
     public var errorSubject: PassthroughSubject<Error, Never> = PassthroughSubject<Error, Never>()
     public var emptyDataSubject: PassthroughSubject<(), Never> = PassthroughSubject<(), Never>()
-    public var noMoreDataSubject: PassthroughSubject<(), Never> = PassthroughSubject<(), Never>()
     
     private var _plainTableCellActionRespond: DefaultTableCellActionRespond?
     private var _plainTableCellDidSelectedRespond: PlainTableCellDidSelectedRespond?

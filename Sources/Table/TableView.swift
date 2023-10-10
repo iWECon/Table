@@ -66,7 +66,8 @@ open class TableView: UITableView {
             .sink { [weak self] emptyV in
                 guard let self else { return }
                 self.addSubview(emptyV)
-                emptyV.frame = self.bounds
+                // fix self.bounds (bounds.origin will follow the change of scrollView.contentOffset)
+                emptyV.frame = CGRect(origin: .zero, size: self.bounds.size)
             }
             .store(in: &viewModel.cancellables)
         

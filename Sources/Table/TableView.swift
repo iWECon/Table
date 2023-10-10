@@ -56,6 +56,13 @@ open class TableView: UITableView {
                 } else {
                     self?.emptyView?.removeFromSuperview()
                 }
+                
+                if self?.viewModel.paging.noMoreData == true {
+                    guard let self else { return }
+                    self.setNeedsLayout()
+                    self.layoutIfNeeded()
+                    self.loadMoreIndicator.noMoreData(on: self)
+                }
             }
         
         viewModel.emptyDataSubject
@@ -68,14 +75,6 @@ open class TableView: UITableView {
                 self.addSubview(emptyV)
                 // fix self.bounds (bounds.origin will follow the change of scrollView.contentOffset)
                 emptyV.frame = CGRect(origin: .zero, size: self.bounds.size)
-            }
-            .store(in: &viewModel.cancellables)
-        
-        viewModel.noMoreDataSubject
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.loadMoreIndicator.noMoreData(on: self)
             }
             .store(in: &viewModel.cancellables)
         

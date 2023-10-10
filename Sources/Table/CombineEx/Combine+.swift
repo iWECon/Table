@@ -58,10 +58,6 @@ extension Publisher where Self.Output == TableData {
                     tableDataProvider.temporaryData = tableDataProvider.data + output
                 }
                 tableDataProvider.applyDataSubject.send()
-                
-                if tableDataProvider.paging.noMoreData {
-                    tableDataProvider.noMoreDataSubject.send()
-                }
             }
         }
     }

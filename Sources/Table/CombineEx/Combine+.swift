@@ -82,7 +82,6 @@ extension Publisher {
                 case .loadMore:
                     tableView?.viewModel.isLoadingMore = false
                     tableView?.loadMoreIndicator.stopLoadMore()
-                    tableView?.viewModel.paging.noMoreData = true
                 }
                 tableView?.tableRefreshControl.endRefreshing()
             }
@@ -94,7 +93,6 @@ extension Publisher {
                 case .loadMore:
                     tableView?.viewModel.isLoadingMore = false
                     tableView?.loadMoreIndicator.stopLoadMore()
-                    tableView?.viewModel.paging.noMoreData = true
                 }
                 tableView?.tableRefreshControl.endRefreshing()
             }

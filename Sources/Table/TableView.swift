@@ -72,7 +72,7 @@ open class TableView: UITableView {
             .store(in: &viewModel.cancellables)
         
         viewModel.noMoreDataSubject
-            .receive(on: RunLoop.main)
+            .delay(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self else { return }
                 self.loadMoreIndicator.noMoreData(on: self)

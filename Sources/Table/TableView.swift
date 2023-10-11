@@ -57,7 +57,7 @@ open class TableView: UITableView {
                     self?.emptyView?.removeFromSuperview()
                 }
                 
-                if self?.viewModel.paging.noMoreData == true {
+                if self?.viewModel.data.isEmpty == false, self?.viewModel.paging.noMoreData == true {
                     guard let self else { return }
                     self.setNeedsLayout()
                     self.layoutIfNeeded()
